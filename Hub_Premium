@@ -1,0 +1,40 @@
+-- ════════════════════════════════════════════════════════
+--  RayVoid Hub
+-- ════════════════════════════════════════════════════════
+
+local Scripts = {
+    -- [PlaceId] = { Name = "Nom du jeu", Url = "lien raw" }
+    [107646426076756] = {
+        Name = "Build-A-Ring-Farm",
+        Url  = "https://raw.githubusercontent.com/csgo1compte-cloud/Premium/refs/heads/main/Premium_Barf",
+    },
+    [101736964164901] = {
+        Name = "My-Gaming-Cafe",
+        Url  = "https://raw.githubusercontent.com/csgo1compte-cloud/Premium/refs/heads/main/cofe",
+    },
+    [131346454575416] = {
+        Name = "Mini-War",
+        Url  = "https://raw.githubusercontent.com/csgo1compte-cloud/Premium/refs/heads/main/war",
+    },
+    [139992937215031] = {
+        Name = "Drop-Balls-For-Brainrots",
+        Url  = "https://raw.githubusercontent.com/csgo1compte-cloud/Premium/refs/heads/main/Balls_pre",
+    },
+    [98624386999411] = {
+            Name = "Hatch-A-Cow",
+            Url  = "https://raw.githubusercontent.com/csgo1compte-cloud/Premium/refs/heads/main/Cow",
+    },
+    
+}
+
+local entry = Scripts[game.PlaceId]
+
+if entry then
+    loadstring(game:HttpGet(entry.Url))()
+else
+    local list = ""
+    for _, data in pairs(Scripts) do
+        list = list .. "\n  • " .. data.Name
+    end
+    warn("[RayVoid Hub] Jeu non supporté. Jeux disponibles :" .. list)
+end
