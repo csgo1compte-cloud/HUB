@@ -24,6 +24,10 @@ local Scripts = {
             Name = "Hatch-A-Cow",
             Url  = "https://raw.githubusercontent.com/csgo1compte-cloud/Premium/refs/heads/main/Cow",
     },
+    [103311003648859] = {
+                Name = "Lucky-Block-Game",
+                Url  = "https://raw.githubusercontent.com/csgo1compte-cloud/Premium/refs/heads/main/LBG",
+        },
     
 }
 
