@@ -28,6 +28,10 @@ local Scripts = {
                 Name = "Lucky-Block-Game",
                 Url  = "https://raw.githubusercontent.com/csgo1compte-cloud/Premium/refs/heads/main/LBG",
         },
+    [128784467030899] = {
+                Name = "Merge-a-Nuke",
+                Url  = "https://raw.githubusercontent.com/csgo1compte-cloud/Premium/refs/heads/main/MergeNUKE",
+        },
     
 }
 
