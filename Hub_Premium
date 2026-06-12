@@ -32,6 +32,10 @@ local Scripts = {
                 Name = "Merge-a-Nuke",
                 Url  = "https://raw.githubusercontent.com/csgo1compte-cloud/Premium/refs/heads/main/MergeNUKE",
         },
+    [140097609164562] = {
+                Name = "Build-A-Dino-Park",
+                Url  = "https://raw.githubusercontent.com/csgo1compte-cloud/Premium/refs/heads/main/BADP",
+        },
     
 }
 
