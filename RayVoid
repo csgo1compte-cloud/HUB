@@ -294,41 +294,31 @@ local ChangeTheme -- forward declaration (définie plus bas)
 -- ════════════════════════════════════════════════════════════════════════════
 local function _saveVoidPrefs()
 	local canWrite = _hasFS or (type(makefolder) == "function" and type(writefile) == "function")
-	print("[RV] _saveVoidPrefs appelé | canWrite=" .. tostring(canWrite) .. " _hasFS=" .. tostring(_hasFS))
-	if not canWrite then warn("[RV] _saveVoidPrefs : pas de filesystem") return end
 	if not _isfolder(RAYVOID_BASE) then
 		local ok, err = pcall(makefolder, RAYVOID_BASE)
-		print("[RV] _saveVoidPrefs makefolder(RAYVOID) ok=" .. tostring(ok) .. " err=" .. tostring(err))
 	end
-	print("[RV] _saveVoidPrefs : thème=" .. _currentThemeName .. " | écriture → " .. VoidPrefsFile)
 	local ok, err = pcall(writefile, VoidPrefsFile, HttpService:JSONEncode({
 		theme   = _currentThemeName,
 		keybind = toggleKeybind,
 	}))
-	print("[RV] _saveVoidPrefs : writefile ok=" .. tostring(ok) .. " err=" .. tostring(err))
 end
 
 local function _loadVoidPrefs()
 	local canRead = _hasFS or (type(isfile) == "function" and type(readfile) == "function")
-	print("[RV] _loadVoidPrefs appelé | canRead=" .. tostring(canRead))
 	if not canRead then return end
 	local exists = isfile(VoidPrefsFile)
-	print("[RV] _loadVoidPrefs : RayVoid.json existe=" .. tostring(exists))
 	if not exists then return end
 	local ok, data = pcall(function()
 		return HttpService:JSONDecode(readfile(VoidPrefsFile))
 	end)
-	print("[RV] _loadVoidPrefs : parse ok=" .. tostring(ok) .. " type(data)=" .. type(data))
 	if not ok or type(data) ~= "table" then return end
 	if type(data.keybind) == "string" and data.keybind ~= "" then
 		toggleKeybind = data.keybind
-		print("[RV] _loadVoidPrefs : keybind chargé=" .. toggleKeybind)
 	end
 	if type(data.theme) == "string" and data.theme ~= "" then
 		-- On stocke sans vérifier RayfieldLibrary.Theme (pas encore disponible ici)
 		-- La vérification se fait dans le watcher UI ready
 		_pendingTheme = data.theme
-		print("[RV] _loadVoidPrefs : thème en attente=" .. data.theme)
 	end
 end
 
@@ -361,29 +351,28 @@ end
 
 -- Sauvegarde le slot auto-load pour ce jeu
 local function _saveMeta()
-	print("[RV] _saveMeta appelé | _hasFS=" .. tostring(_hasFS) .. " CAutoloadFile=" .. tostring(CAutoloadFile))
-	if not _hasFS then warn("[RV] _saveMeta : _hasFS false") return end
-	if not CAutoloadFile then warn("[RV] _saveMeta : CAutoloadFile nil") return end
-	local payload = HttpService:JSONEncode({ autoLoadSlot = CAutoLoadSlot or "" })
-	print("[RV] _saveMeta : écriture → " .. CAutoloadFile .. " | payload=" .. payload)
-	local ok, err = pcall(writefile, CAutoloadFile, payload)
-	print("[RV] _saveMeta : writefile ok=" .. tostring(ok) .. " err=" .. tostring(err))
+	if not _hasFS or not CAutoloadFile then return end
+	local slotToSave = (CAutoLoadSlot and CAutoLoadSlot ~= "(désactivé)") and CAutoLoadSlot or ""
+	local payload = HttpService:JSONEncode({ autoLoadSlot = slotToSave })
+	pcall(writefile, CAutoloadFile, payload)
 end
 
 -- Charge le slot auto-load pour ce jeu
 local function _loadMeta()
-	print("[RV] _loadMeta appelé | _hasFS=" .. tostring(_hasFS) .. " CAutoloadFile=" .. tostring(CAutoloadFile))
 	if not _hasFS or not CAutoloadFile then return end
 	local exists = isfile(CAutoloadFile)
-	print("[RV] _loadMeta : autoload.json existe=" .. tostring(exists))
 	if not exists then return end
 	local ok, data = pcall(function()
 		return HttpService:JSONDecode(readfile(CAutoloadFile))
 	end)
-	print("[RV] _loadMeta : parse ok=" .. tostring(ok) .. " data=" .. tostring(type(data) == "table" and data.autoLoadSlot or "nil"))
 	if not ok or type(data) ~= "table" then return end
-	CAutoLoadSlot = (type(data.autoLoadSlot) == "string" and data.autoLoadSlot ~= "") and data.autoLoadSlot or nil
-	print("[RV] _loadMeta : CAutoLoadSlot=" .. tostring(CAutoLoadSlot))
+	local slot = data.autoLoadSlot
+	-- "(désactivé)" est la valeur sentinel UI — on la traite comme nil
+	if type(slot) == "string" and slot ~= "" and slot ~= "(désactivé)" then
+		CAutoLoadSlot = slot
+	else
+		CAutoLoadSlot = nil
+	end
 end
 
 local RayfieldLibrary = {
@@ -1048,15 +1037,11 @@ end
 local SelectedTheme = RayfieldLibrary.Theme.Default
 
 ChangeTheme = function(Theme)
-	print("[RV] ChangeTheme appelé | Theme=" .. tostring(Theme) .. " type=" .. type(Theme))
 	if typeof(Theme) == 'string' then
 		local resolved = RayfieldLibrary.Theme[Theme]
-		print("[RV] ChangeTheme : resolved=" .. tostring(resolved ~= nil))
 		if not resolved then
 			local available = {}
 			for k, _ in pairs(RayfieldLibrary.Theme) do table.insert(available, k) end
-			print("[RV] ChangeTheme : thèmes disponibles=" .. table.concat(available, ", "))
-			warn("[RV] ChangeTheme : thème introuvable → " .. tostring(Theme))
 			error("theme not found")
 		end
 		SelectedTheme = resolved
@@ -1905,37 +1890,28 @@ function RayfieldLibrary:CreateWindow(Settings)
 	--  FILESYSTEM INIT — toujours exécuté, indépendant de ConfigurationSaving
 	--  Garantit que RAYVOID/ et RAYVOID/{PlaceId}/ existent avant tout
 	-- ════════════════════════════════════════════════════════════════════
-	print("[RV] makefolder=" .. type(makefolder) .. " isfile=" .. type(isfile) .. " writefile=" .. type(writefile) .. " readfile=" .. type(readfile) .. " isfolder=" .. type(isfolder))
 
 	_hasFS = type(makefolder) == "function"
 	       and type(isfile) == "function"
 	       and type(writefile) == "function"
 	       and type(readfile) == "function"
 
-	print("[RV] _hasFS=" .. tostring(_hasFS))
 
 	if _hasFS then
-		print("[RV] FILESYSTEM INIT start")
 		-- 1. Dossier racine RAYVOID/
 		local rayvoidExists = _isfolder(RAYVOID_BASE)
-		print("[RV] RAYVOID/ existe=" .. tostring(rayvoidExists))
 		if not rayvoidExists then
 			local ok, err = pcall(makefolder, RAYVOID_BASE)
-			print("[RV] makefolder(RAYVOID) ok=" .. tostring(ok) .. " err=" .. tostring(err))
 		end
 		-- 2. Dossier du jeu courant RAYVOID/{PlaceId}/
 		CPlaceFolder = RAYVOID_BASE .. "/" .. tostring(game.PlaceId)
 		local placeExists = _isfolder(CPlaceFolder)
-		print("[RV] " .. CPlaceFolder .. " existe=" .. tostring(placeExists))
 		if not placeExists then
 			local ok, err = pcall(makefolder, CPlaceFolder)
-			print("[RV] makefolder(PlaceFolder) ok=" .. tostring(ok) .. " err=" .. tostring(err))
 		end
 		-- 3. Fichier auto-load propre à ce jeu
 		CAutoloadFile = CPlaceFolder .. "/autoload.json"
-		print("[RV] CAutoloadFile=" .. CAutoloadFile)
 	else
-		print("[RV] FILESYSTEM INIT skipped — _hasFS false")
 	end
 
 	_loadVoidPrefs()
@@ -4505,11 +4481,8 @@ function RayfieldLibrary:CreateWindow(Settings)
 		CurrentOption = {currentThemeName},
 		Flag = 'SettingsTheme',
 		Callback = function(selected)
-			print("[RV] Dropdown thème callback | selected type=" .. type(selected) .. " val=" .. tostring(type(selected) == "table" and selected[1] or selected))
 			local name = selected[1] or selected
-			print("[RV] Dropdown thème : name=" .. tostring(name))
 			local ok, err = pcall(ChangeTheme, name)
-			print("[RV] Dropdown thème : ChangeTheme ok=" .. tostring(ok) .. " err=" .. tostring(err))
 			if not ok then
 				RayfieldLibrary:Notify({Title = 'Thème introuvable', Content = 'Impossible de charger le thème "'..tostring(name)..'".'})
 			end
