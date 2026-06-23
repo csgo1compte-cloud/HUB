@@ -5349,13 +5349,13 @@ function RayfieldLibrary:ShowCredit(onClose)
 	discordBtn.Font             = Enum.Font.Gotham
 	discordBtn.TextSize         = useMobile and 13 or 15
 	discordBtn.BorderSizePixel  = 0
-	discordBtn.Text             = "🔗https://discord.gg/8HxYJVy9tP (click to copy)"
+	discordBtn.Text             = "🔗https://discord.gg/sAs78RBq65 (click to copy)"
 	discordBtn.Parent           = bg
 	discordBtn.MouseButton1Click:Connect(function()
-		pcall(setclipboard, "https://discord.gg/8HxYJVy9tP")
+		pcall(setclipboard, "https://discord.gg/sAs78RBq65")
 		discordBtn.Text = "✅ Link copied!"
 		task.wait(2)
-		discordBtn.Text = "🔗 https://discord.gg/8HxYJVy9tP  (click to copy)"
+		discordBtn.Text = "🔗 https://discord.gg/sAs78RBq65  (click to copy)"
 	end)
 
 	local rscriptsBtn = Instance.new("TextButton")
