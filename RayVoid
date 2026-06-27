@@ -5394,7 +5394,6 @@ function RayfieldLibrary:ShowCredit(onClose)
 		if onClose then onClose() end
 	end)
 end
-
 -- ════════════════════════════════════════════════════════════════════════════
 --  DESTROY ALL — détruit tous les ScreenGui Rayfield (pour re-injection)
 -- ════════════════════════════════════════════════════════════════════════════
